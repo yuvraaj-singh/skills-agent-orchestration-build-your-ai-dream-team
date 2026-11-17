@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Community Portal",
+      "owner": "Mona Patel",
+      "status": "active",
+      "recentActivity": "Published the updated contributor onboarding flow for review.",
+      "priority": "high",
+      "summary": "Make it easier for new contributors to find project guidance and get started."
+    },
+    {
+      "name": "Insights Dashboard",
+      "owner": "Jordan Lee",
+      "status": "planned",
+      "recentActivity": "The team agreed on the first set of usage metrics and reporting needs.",
+      "priority": "medium",
+      "summary": "Bring key product usage trends into one clear, shareable workspace."
+    },
+    {
+      "name": "Mobile Sync",
+      "owner": "Avery Chen",
+      "status": "blocked",
+      "recentActivity": "Integration testing is waiting on the updated identity service endpoint.",
+      "priority": "urgent",
+      "summary": "Keep offline mobile changes in sync once a device reconnects."
+    },
+    {
+      "name": "Design System Refresh",
+      "owner": "Sam Rivera",
+      "status": "completed",
+      "recentActivity": "The refreshed component library and usage notes were released.",
+      "priority": "low",
+      "summary": "Standardize common interface patterns so teams can build consistent experiences."
+    }
+  ]
+}

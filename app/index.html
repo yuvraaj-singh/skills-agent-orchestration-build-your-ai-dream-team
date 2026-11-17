@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A concise overview of project status, ownership, activity, and priority.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <h1>Project Pulse</h1>
+        <p>A quick view of what teams are building, who owns it, and where attention is needed.</p>
+      </header>
+
+      <section aria-labelledby="projects-heading">
+        <h2 id="projects-heading">Projects</h2>
+        <p id="project-message" role="status" aria-live="polite">Loading projects…</p>
+        <div id="project-grid" class="project-grid" aria-busy="true"></div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const grid = document.getElementById("project-grid");
+        const message = document.getElementById("project-message");
+        const validStatuses = new Set(["active", "planned", "blocked", "completed"]);
+        const validPriorities = new Set(["high", "medium", "low", "urgent"]);
+        const requiredFields = ["name", "owner", "status", "recentActivity", "priority", "summary"];
+
+        function createTextElement(tagName, className, value) {
+          const element = document.createElement(tagName);
+          if (className) {
+            element.className = className;
+          }
+          element.textContent = value;
+          return element;
+        }
+
+        function createProjectCard(project) {
+          const card = document.createElement("article");
+          card.className = "project-card";
+
+          const header = document.createElement("header");
+          header.className = "card-header";
+
+          const titleGroup = document.createElement("div");
+          titleGroup.append(
+            createTextElement("h3", "", project.name),
+            createTextElement("p", "owner", `Owner: ${project.owner}`)
+          );
+          header.append(titleGroup);
+
+          const statusValue = project.status.trim().toLowerCase();
+          const statusLabel = createTextElement("span", "status-badge", `Status: ${project.status}`);
+          if (validStatuses.has(statusValue)) {
+            statusLabel.dataset.status = statusValue;
+          }
+          header.append(statusLabel);
+          card.append(header);
+
+          const priorityValue = project.priority.trim().toLowerCase();
+          const priorityLabel = createTextElement("span", "priority", `Priority: ${project.priority}`);
+          if (validPriorities.has(priorityValue)) {
+            priorityLabel.dataset.priority = priorityValue;
+          }
+          card.append(priorityLabel);
+          card.append(createTextElement("p", "project-summary", project.summary));
+
+          const activity = document.createElement("section");
+          activity.className = "recent-activity";
+          activity.setAttribute("aria-label", `Recent activity for ${project.name}`);
+          activity.append(
+            createTextElement("h4", "", "Recent activity"),
+            createTextElement("p", "", project.recentActivity)
+          );
+          card.append(activity);
+
+          return card;
+        }
+
+        function hasRequiredText(project) {
+          return project !== null
+            && typeof project === "object"
+            && requiredFields.every((field) =>
+              typeof project[field] === "string" && project[field].trim().length > 0
+            );
+        }
+
+        async function loadProjects() {
+          try {
+            const response = await fetch("project-data.json");
+            if (!response.ok) {
+              throw new Error(`Project data request failed with status ${response.status}.`);
+            }
+
+            const data = await response.json();
+            if (!data || !Array.isArray(data.projects)) {
+              throw new Error("Project data must contain a projects array.");
+            }
+
+            const projects = data.projects.filter(hasRequiredText);
+            if (projects.length === 0) {
+              message.textContent = data.projects.length === 0
+                ? "There are no projects to display yet."
+                : "No valid projects were found. Each project needs a name, owner, status, recent activity, priority, and summary.";
+              return;
+            }
+
+            const cards = document.createDocumentFragment();
+            for (const project of projects) {
+              cards.append(createProjectCard(project));
+            }
+            grid.append(cards);
+            message.textContent = projects.length === 1
+              ? "Showing 1 project."
+              : `Showing ${projects.length} projects.`;
+          } catch (error) {
+            message.textContent = "Projects could not be loaded. Please try again later.";
+            console.error("Unable to load project data.", error);
+          } finally {
+            grid.setAttribute("aria-busy", "false");
+          }
+        }
+
+        loadProjects();
+      })();
+    </script>
+  </body>
+</html>
